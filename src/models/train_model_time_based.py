@@ -4,8 +4,9 @@ import numpy as np
 # Eingbae über Terminal
 import sys
 # Für die Funktion "lade_daten" aus der Datei
-from src.data.daten_laden_jira import lade_daten
-from src.features.feature_encoding_jira import encode_df
+from src.data.daten_laden_time_based import lade_daten
+from src.features.feature_encoding_time_based import encode_splits
+from src.utils.data_split import time_train_val_test_split
 # Für Linear Regression Model
 from sklearn.linear_model import LinearRegression
 # ML-Modelle
@@ -16,44 +17,49 @@ from sklearn.ensemble import (
 )
 from xgboost import XGBRegressor
 
-# Für Train und Test Daten aufzuteilen
-from sklearn.model_selection import train_test_split
 # Um zu vergleichen wie gut das Modell ist R^2, MAE, RMSE
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, median_absolute_error
 
 def train_model(model_name: str):
-    #Daten laden + Feature Engineering durch Encoding
+    #Daten laden 
     df_static, df_static_process = lade_daten()
-    df_static_encode = encode_df(df_static)
-    df_static_process_encode = encode_df(df_static_process)
+
+    # Chronologischer Split mit Hilfsfunktion: time_train_val_test_split
+    train_static, val_static, test_static = time_train_val_test_split(df_static, time_col="created")
+    train_static_process, val_static_process, test_static_process = time_train_val_test_split(df_static_process, time_col="created")
+
+    # Created wieder rausnehmen (wird nur für den Split genutzt)
+    train_static = train_static.drop(columns="created")
+    val_static = val_static.drop(columns="created")
+    test_static = test_static.drop(columns="created")
+
+    train_static_process = train_static_process.drop(columns="created")
+    val_static_process = val_static_process.drop(columns="created")
+    test_static_process = test_static_process.drop(columns="created")
+
+    # Feature Encoding getrennt pro Split
+    train_static_encode, val_static_encode, test_static_encode = encode_splits(train_static, val_static,test_static)
+    train_static_process_encode, val_static_process_encode, test_static_process_encode = encode_splits(train_static_process, val_static_process, test_static_process)
 
     # Nur die static Features ohne die Zielvariable
-    x_static = df_static_encode.drop(columns=["cycle_time_days"])
+    x_train_static = train_static_encode.drop(columns=["cycle_time_days"])
     # Nur die Werte der Zielvariablen
-    y_static = df_static_encode["cycle_time_days"]
+    y_train_static = train_static_encode["cycle_time_days"]
 
-    # Static + Process Features ohne die Zielvariable
-    x_static_process = df_static_process_encode.drop(columns=["cycle_time_days"])
-    # Nur die Werte der Zielvariablen
-    y_static_process = df_static_process_encode["cycle_time_days"]
+    x_val_static = val_static_encode.drop(columns=["cycle_time_days"])
+    y_val_static = val_static_encode["cycle_time_days"]
 
-    x_train_static, x_test_static, y_train_static, y_test_static = train_test_split(
-        x_static, 
-        y_static,
-        # 20% der Daten werden zum Testen genommen 
-        test_size=0.2,
-        # Reihenfolge wie die Trainings Daten zugeordnet werden
-        random_state=432
-    )
+    x_test_static = test_static_encode.drop(columns=["cycle_time_days"])
+    y_test_static = test_static_encode["cycle_time_days"]
 
-    x_train_static_process, x_test_static_process, y_train_static_process, y_test_static_process = train_test_split(
-        x_static_process, 
-        y_static_process,
-        # 20% der Daten werden zum Testen genommen 
-        test_size=0.2,
-        # Reihenfolge wie die Trainings Daten zugeordnet werden
-        random_state=432
-    )
+    x_train_static_process = train_static_process_encode.drop(columns=["cycle_time_days"])
+    y_train_static_process = train_static_process_encode["cycle_time_days"]
+
+    x_val_static_process = val_static_process_encode.drop(columns=["cycle_time_days"])
+    y_val_static_process = val_static_process_encode["cycle_time_days"]
+
+    x_test_static_process = test_static_process_encode.drop(columns=["cycle_time_days"])
+    y_test_static_process = test_static_process_encode["cycle_time_days"]
 
     # Modellauswahl
     if model_name.lower() == "linear":
@@ -71,7 +77,7 @@ def train_model(model_name: str):
         sys.exit()
 
     # Modelltraining
-    # model trainieren mit den Trainings Daten
+    # Modell trainieren mit den Trainings Daten
     model.fit(x_train_static, y_train_static)
     # Die Vorhersage des Targets wird hier gespeichert
     y_pred_static = model.predict(x_test_static)
