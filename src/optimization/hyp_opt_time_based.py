@@ -1,15 +1,9 @@
-# Für die Funktion "lade_daten" aus der Datei
-from src.data.daten_laden_jira import lade_daten
-from src.features.feature_encoding_jira import encode_df
-# Für RandomForestRegression Model
-from sklearn.ensemble import RandomForestRegressor
-# Für Train und Test Daten aufzuteilen
-from sklearn.model_selection import train_test_split
-# Um zu vergleichen wie gut das Modell ist R^2, MAE, RMSE
+from src.data.daten_laden_time_based import lade_daten
+from src.features.feature_encoding_time_based import encode_splits
+from src.utils.reporting import save_results
+from src.utils.data_split import time_train_val_test_split
+from sklearn.model_selection import RandomizedSearchCV, TimeSeriesSplit
 from sklearn.metrics import mean_absolute_error, make_scorer
-# Für Hyperparameter-Optimierung 
-from sklearn.model_selection import RandomizedSearchCV
-# Für Dataframes
 import pandas as pd
 import sys
 from sklearn.ensemble import (
@@ -23,43 +17,47 @@ def optimize_model(model_name: str):
 
     mae_scorer = make_scorer(mean_absolute_error, greater_is_better=False)
 
-    #Daten laden + Feature Engineering durch Encoding
+    #Daten laden 
     df_static, df_static_process = lade_daten()
-    df_static_encode = encode_df(df_static)
-    df_static_process_encode = encode_df(df_static_process)
+
+    # Chronologischer Split mit Hilfsfunktion: time_train_val_test_split
+    train_static, val_static, test_static = time_train_val_test_split(df_static, time_col="created")
+    train_static_process, val_static_process, test_static_process = time_train_val_test_split(df_static_process, time_col="created")
+
+    # Created wieder rausnehmen (wird nur für den Split genutzt)
+    train_static = train_static.drop(columns="created")
+    val_static = val_static.drop(columns="created")
+
+    train_static_process = train_static_process.drop(columns="created")
+    val_static_process = val_static_process.drop(columns="created")
+
+    # Feature Encoding getrennt pro Split
+    train_static_encode, val_static_encode, test_static_encode = encode_splits(train_static, val_static,test_static)
+    train_static_process_encode, val_static_process_encode, test_static_process_encode = encode_splits(train_static_process, val_static_process, test_static_process)
 
     # Nur die static Features ohne die Zielvariable
-    x_static = df_static_encode.drop(columns=["cycle_time_days"])
+    x_train_static = train_static_encode.drop(columns=["cycle_time_days"])
     # Nur die Werte der Zielvariablen
-    y_static = df_static_encode["cycle_time_days"]
+    y_train_static = train_static_encode["cycle_time_days"]
 
-    # Static + Process Features ohne die Zielvariable
-    x_static_process = df_static_process_encode.drop(columns=["cycle_time_days"])
-    # Nur die Werte der Zielvariablen
-    y_static_process = df_static_process_encode["cycle_time_days"]
+    x_val_static = val_static_encode.drop(columns=["cycle_time_days"])
+    y_val_static = val_static_encode["cycle_time_days"]
 
-    x_train_static, x_test_static, y_train_static, y_test_static = train_test_split(
-        x_static, 
-        y_static,
-        # 20% der Daten werden zum Testen genommen 
-        test_size=0.2,
-        # Reihenfolge wie die Trainings Daten zugeordnet werden
-        random_state=432
-    )
+    x_train_static_process = train_static_process_encode.drop(columns=["cycle_time_days"])
+    y_train_static_process = train_static_process_encode["cycle_time_days"]
 
-    x_train_static_process, x_test_static_process, y_train_static_process, y_test_static_process = train_test_split(
-        x_static_process, 
-        y_static_process,
-        # 20% der Daten werden zum Testen genommen 
-        test_size=0.2,
-        # Reihenfolge wie die Trainings Daten zugeordnet werden
-        random_state=432
-    )
+    x_val_static_process = val_static_process_encode.drop(columns=["cycle_time_days"])
+    y_val_static_process = val_static_process_encode["cycle_time_days"]
 
+    # train + val zusammenführen
+    x_trainval_static = pd.concat([x_train_static, x_val_static], axis=0)
+    y_trainval_static = pd.concat([y_train_static, y_val_static], axis=0)
+    x_trainval_static_process = pd.concat([x_train_static_process, x_val_static_process], axis=0)
+    y_trainval_static_process = pd.concat([y_train_static_process, y_val_static_process], axis=0)
+
+    # Modellauswahl
     if model_name.lower() == "rf":
         model = RandomForestRegressor(random_state=432)
-        # Hyperparameter-Optimierung
-        # Parameter Einstellung
         param_grid = {
             # Anzahl an Bäumen in random forest
             "n_estimators": [200, 400, 600],
@@ -111,12 +109,15 @@ def optimize_model(model_name: str):
         print("Unbekanntes Modell! Nutze: rf, gbr, xgbr oder histgbr")
         sys.exit()
 
+    # Time-aware CV (nur Vergangenheit -> Zukunft)
+    tscv = TimeSeriesSplit(n_splits=5)
+
     # Randomized Grid Search
     RandomGrid = RandomizedSearchCV(
         estimator=model, 
         param_distributions=param_grid,
         n_iter=20, 
-        cv=3, 
+        cv=tscv, 
         verbose=2, 
         n_jobs=-1,
         scoring=mae_scorer,
@@ -124,16 +125,13 @@ def optimize_model(model_name: str):
     )
 
     # Modelltraining
-    # model trainieren mit den Trainings Daten
-    RandomGrid.fit(x_train_static, y_train_static)
-    # Test wie gut die Vorhersage ist
+    # model trainieren mit den Trainings + val Daten
+    RandomGrid.fit(x_trainval_static, y_trainval_static)
     print("\nBeste gefundene RandomForest Parameter (STATIC):")
     print(RandomGrid.best_params_)
 
-    # model trainieren mit den Trainings Daten
-    RandomGrid.fit(x_train_static_process, y_train_static_process)
-    # Die Vorhersage des Targets wird hier gespeichert
-    y_pred_static_process = RandomGrid.predict(x_test_static_process)
+    # model trainieren mit den Trainings + val Daten
+    RandomGrid.fit(x_trainval_static_process, y_trainval_static_process)
     # Test wie gut die Vorhersage ist
     print("\nBeste gefundene RandomForest Parameter (STATIC + PROCESS):")
     print(RandomGrid.best_params_)
@@ -150,5 +148,3 @@ if __name__ == "__main__":
     arg = sys.argv[1]
     # Modellname in die Funktion übergeben
     optimize_model(arg)
-
-
