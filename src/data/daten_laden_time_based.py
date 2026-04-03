@@ -20,6 +20,8 @@ def lade_daten():
         "created_month": 1,
         "created_weekday": 1,
         "is_weekend_created": 1,
+        # Für Time based Split
+        "created": 1,
 
         # Zielvariable
         "cycle_time_days": 1,
@@ -36,6 +38,8 @@ def lade_daten():
         "created_month": 1,
         "created_weekday": 1,
         "is_weekend_created": 1,
+        # Für Time based Split
+        "created": 1,
 
         # Prozessbezogene Features
         "changelog_total": 1,

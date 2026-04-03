@@ -3,13 +3,13 @@ from pymongo import MongoClient
 # Für Dataframes
 import pandas as pd
 
-def lade_daten():
+def lade_daten_spring():
     # Verbindung herstellen
     client = MongoClient("mongodb://localhost:27017") 
     # Datenbank wählen
     db = client["JiraReposAnon"]
     # Collection wählen
-    collection = db["jira_features_resolved"]
+    collection = db["spring_features_resolved"]
     # Static Features herausfiltern
     static_features = {
         # Static Features
