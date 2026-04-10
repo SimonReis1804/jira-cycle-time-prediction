@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Jira Cycle Time Prediction (Bachelorarbeit)
 
 Dieses Projekt dient zur Vorhersage von Durchlaufzeiten (Cycle Time) abgeschlossener Jira-Tickets mithilfe von ML-Modellen.
@@ -34,3 +35,5 @@ Beispiel:
 ## Hinweise
 - Keine sensiblen Daten committen (`.env` bleibt lokal und ist in `.gitignore`).
 - Bei großen Datenmengen: immer Projection + Streaming verwenden.
+=======
+
