@@ -1,7 +1,7 @@
 # src/data/
 
 Data Access Layer: Verbindung zu MongoDB und standardisierte Datenzugriffe.
-
+Test für das pushen
 ## Was hier rein soll (für die Bachelorarbeit)
 1. **MongoDB Client**
    - Aufbau einer zentralen Verbindung (Singleton/Reuse)
