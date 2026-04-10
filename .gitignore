@@ -1,0 +1,27 @@
+# =========================
+# Python / Virtual Env
+# =========================
+.venv/
+__pycache__/
+*.pyc
+
+# =========================
+# Environment / Secrets
+# =========================
+.env
+
+# =========================
+# Operating System
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Optional: Artefakte
+# =========================
+reports/
+.vscode/
+src/utils/reporting.py
+src/utils/transfer_results.py
+/tests
+
