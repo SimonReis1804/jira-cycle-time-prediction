@@ -4,9 +4,7 @@ from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder
 PRIORITIES = ["Low", "Medium", "High", "Highest"]
 
 def fit_encoders(train_df: pd.DataFrame):
-    """
-    Lernt die Kategorien/Mapping NUR anhand der Trainingsdaten.
-    """
+
     ohe = OneHotEncoder(handle_unknown="ignore", sparse_output=False).set_output(transform="pandas")
     ohe.fit(train_df[["issue_type"]])
 
@@ -20,10 +18,7 @@ def fit_encoders(train_df: pd.DataFrame):
 
 
 def transform_with_encoders(df: pd.DataFrame, ohe: OneHotEncoder, ohe_weekday: OneHotEncoder, oe: OrdinalEncoder) -> pd.DataFrame:
-    """
-    Wendet die bereits gelernten Encoder auf beliebige Daten an (train/val/test).
-    Ergebnis hat konsistente Spalten.
-    """
+
     df = df.copy()
 
     ohe_df = ohe.transform(df[["issue_type"]])
@@ -37,9 +32,7 @@ def transform_with_encoders(df: pd.DataFrame, ohe: OneHotEncoder, ohe_weekday: O
 
 
 def encode_splits(train_df: pd.DataFrame, val_df: pd.DataFrame, test_df: pd.DataFrame):
-    """
-    Fit auf train, transform auf train/val/test.
-    """
+
     ohe, ohe_weekday, oe = fit_encoders(train_df)
     train_enc = transform_with_encoders(train_df, ohe, ohe_weekday, oe)
     val_enc = transform_with_encoders(val_df, ohe, ohe_weekday, oe)
