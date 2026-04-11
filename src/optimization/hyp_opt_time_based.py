@@ -14,6 +14,16 @@ from sklearn.ensemble import (
 from xgboost import XGBRegressor
 
 def optimize_model(model_name: str):
+    """
+    Führt eine Hyperparameteroptimierung mittels Validation-Set für verschiedene ML-Modelle durch.
+
+    - Durchführung einer Randomized Search zur Optimierung der Hyperparameter
+    - Ausgabe der besten Parameter für zwei Feature-Sets:
+        1. nur statische Merkmale
+        2. statische und prozessbezogene Merkmale
+
+    Ziel ist die Verbesserung der Modellleistung durch geeignete Parametereinstellungen.
+    """
 
     mae_scorer = make_scorer(mean_absolute_error, greater_is_better=False)
 

@@ -20,6 +20,16 @@ from sklearn.ensemble import (
 from xgboost import XGBRegressor
 
 def optimize_model(model_name: str):
+    """
+    Führt eine Hyperparameteroptimierung für verschiedene ML-Modelle durch.
+
+    - Durchführung einer Randomized Search zur Optimierung der Hyperparameter
+    - Ausgabe der besten Parameter für zwei Feature-Sets:
+        1. nur statische Merkmale
+        2. statische und prozessbezogene Merkmale
+
+    Ziel ist die Verbesserung der Modellleistung durch geeignete Parametereinstellungen.
+    """
 
     mae_scorer = make_scorer(mean_absolute_error, greater_is_better=False)
 
@@ -61,17 +71,11 @@ def optimize_model(model_name: str):
         # Hyperparameter-Optimierung
         # Parameter Einstellung
         param_grid = {
-            # Anzahl an Bäumen in random forest
             "n_estimators": [200, 400, 600],
-            # Maximale Zahl von Level in trees
             "max_depth": [None, 10, 20],
-            # Minimum number of samples required to split a node
             "min_samples_split": [2, 10, 50],
-            # Minimum number of samples required at each leaf node
             "min_samples_leaf": [1, 5, 20],
-            # Number of features to consider at every split
             "max_features": ["sqrt",0.3, 0.5],
-            # Method of selecting samples for training each tree
             "bootstrap": [True],
             "max_samples": [0.6, 0.8, 0.9],
         }
@@ -132,8 +136,6 @@ def optimize_model(model_name: str):
 
     # model trainieren mit den Trainings Daten
     RandomGrid.fit(x_train_static_process, y_train_static_process)
-    # Die Vorhersage des Targets wird hier gespeichert
-    y_pred_static_process = RandomGrid.predict(x_test_static_process)
     # Test wie gut die Vorhersage ist
     print("\nBeste gefundene RandomForest Parameter (STATIC + PROCESS):")
     print(RandomGrid.best_params_)
