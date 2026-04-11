@@ -1,6 +1,21 @@
 import numpy as np
 import pandas as pd
+"""
+    Teilt einen Datensatz zeitbasiert in Trainings-, Validierungs- und Testdaten auf.
 
+    Die Aufteilung erfolgt chronologisch anhand einer Zeitspalte, sodass
+    zukünftige Daten nicht im Training enthalten sind.
+
+    Parameter:
+    - df: Eingabedaten als DataFrame
+    - time_col: Name der Zeitspalte
+    - train_size: Anteil der Trainingsdaten
+    - val_size: Anteil der Validierungsdaten
+    - test_size: Anteil der Testdaten
+
+    Rückgabe:
+    - train_df, val_df, test_df: chronologisch getrennte Teilmengen
+"""
 def time_train_val_test_split(df, 
                               time_col="created", 
                               train_size=0.7, 
