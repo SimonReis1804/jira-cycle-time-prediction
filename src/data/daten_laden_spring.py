@@ -62,6 +62,7 @@ def lade_daten_spring():
     results_static_process = collection.find({}, static_process_features)
     df_static_process = pd.DataFrame(data=results_static_process)
 
+    # Dataframe zurück geben
     return df_static, df_static_process
 
 
