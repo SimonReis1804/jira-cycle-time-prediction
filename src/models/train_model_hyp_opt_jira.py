@@ -20,6 +20,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, median_absolute_error
 
 def train_model(model_name: str):
+    """
+    Trainiert ein Modell innerhalb eines Jira-Projektes. Optimale Hyperparameter wurden eingefügt.
+    
+    Es werde zwei Feature-Sets betrachtet
+    1. Statische Merkmale
+    2. Statische und prozessbezogene Merkmale
+    
+    Ziel ist die Untersuchung wie ML-Modelle die Zielvariable vorhersagen können und welchen Einfluss eine Hyperparameteroptimierung auf die Vorhersage hat
+    """
     #Daten laden + Feature Engineering durch Encoding
     df_static, df_static_process = lade_daten()
     df_static_encode = encode_df(df_static)

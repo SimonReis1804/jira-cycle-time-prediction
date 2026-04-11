@@ -17,6 +17,16 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, m
 
 
 def train_model(model_name: str):
+    """
+    Trainiert ein Modell auf Jira-Daten und testet es auf MariaDB-Daten.
+
+    Es werden zwei Feature-Sets betrachtet:
+    1. nur statische Merkmale
+    2. statische + prozessbezogene Merkmale
+
+    Ziel ist die Untersuchung der projektübergreifenden Generalisierbarkeit.
+    """
+
     df_static_jira, df_static_process_jira = lade_daten()
     df_static_mariadb, df_static_process_mariadb = lade_daten_mariadb()
 
@@ -64,9 +74,6 @@ def train_model(model_name: str):
         print("Unbekanntes Modell! Nutze: linear, rf, gbr, xgbr oder histgbr")
         sys.exit()
 
-    #===================================
-    # MODELL MIT STATIC-FEATURES
-    #===================================
     model.fit(x_static_jira, y_static_jira)
     y_pred_static = model.predict(x_static_mariadb)
     r2_static = r2_score(y_static_mariadb, y_pred_static)
@@ -79,9 +86,6 @@ def train_model(model_name: str):
     print (f"Static-Features RMSE: {model_name} {RMSE_static:.4f}")
     print (f"Static-Features MedAE: {model_name} {MedAE_static:.4f}")
 
-    #===================================
-    # MODELL MIT STATIC+PROCESS-FEATURES
-    #===================================
     model.fit(x_static_process_jira, y_static_process_jira)
     y_pred_static_process = model.predict(x_static_process_mariadb)
     r2_static_process = r2_score(y_static_process_mariadb, y_pred_static_process)

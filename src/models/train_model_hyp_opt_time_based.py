@@ -19,6 +19,20 @@ from xgboost import XGBRegressor
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, median_absolute_error
 
 def train_model(model_name: str):
+    """
+    Trainiert ein Modell (zeitbezogen) innerhalb eins Jira-Projektes. Optimale Hyperparameter wurden eingefügt.
+    
+    Es werden zwei Feature-Sets betrachtet
+    1. Statische Merkmale
+    2. Statische und prozessbezogene Merkmale
+    
+    Besonderheiten
+    - Trainiert werden die Modelle auf den ältesten 70% der Daten
+    - Gestet auf den neuesten 15% der Daten
+    - Die Konfiguration der Hyperparameter fand mittels Validation Set statt
+    
+    Ziel ist es zu schauen wie Modelle auf eine zeitbezogene Datenaufteilung reagieren und welche Rolle der Einfluss einer Hyperparameteroptimierung hat
+    """
     #Daten laden 
     df_static, df_static_process = lade_daten()
 

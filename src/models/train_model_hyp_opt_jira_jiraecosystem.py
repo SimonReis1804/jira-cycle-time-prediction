@@ -16,6 +16,15 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, m
 
 
 def train_model(model_name: str):
+    """
+    Trainiert ein Modell auf Jira-Daten und testet es auf Jiraecosystem-Daten. Es wurden Hyperparameter eingefügt, die mittels Validation Set konfiguriert wurden.
+
+    Es werden zwei Feature-Sets betrachtet:
+    1. nur statische Merkmale
+    2. statische + prozessbezogene Merkmale
+
+    Ziel ist die Untersuchung der projektübergreifenden Generalisierbarkeit und welchen Einfluss eine Hyperparameteroptimierung auf die Vorhersage hat.
+    """
     df_static_jira, df_static_process_jira = lade_daten()
     df_static_jiraecosystem, df_static_process_jiraecosystem = lade_daten_jiraecosystem()
 

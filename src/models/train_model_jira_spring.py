@@ -17,9 +17,19 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, m
 
 
 def train_model(model_name: str):
+    """
+    Trainiert ein Modell auf Jira-Daten und testet es auf Spring-Daten.
+
+    Es werden zwei Feature-Sets betrachtet:
+    1. nur statische Merkmale
+    2. statische + prozessbezogene Merkmale
+
+    Ziel ist die Untersuchung der projektübergreifenden Generalisierbarkeit.
+    """
     df_static_jira, df_static_process_jira = lade_daten()
     df_static_spring, df_static_process_spring = lade_daten_spring()
 
+    # Vereinheitlichung projektspezifischer Tickettypen und Prioritäten
     df_static_jira["issue_type_grouped"] = df_static_jira["issue_type"].apply(map_issue_type)
     df_static_process_jira["issue_type_grouped"] = df_static_process_jira["issue_type"].apply(map_issue_type)
     df_static_spring["issue_type_grouped"] = df_static_spring["issue_type"].apply(map_issue_type)
@@ -63,10 +73,8 @@ def train_model(model_name: str):
     else:
         print("Unbekanntes Modell! Nutze: linear, rf, gbr, xgbr oder histgbr")
         sys.exit()
-
-    #===================================
-    # MODELL MIT STATIC-FEATURES
-    #===================================
+   
+    # Training auf dem Quellprojekt Jira und Evaluation auf dem Zielprojekt Spring (statische Merkmale)
     model.fit(x_static_jira, y_static_jira)
     y_pred_static = model.predict(x_static_spring)
     r2_static = r2_score(y_static_spring, y_pred_static)
@@ -79,9 +87,7 @@ def train_model(model_name: str):
     print (f"Static-Features RMSE: {model_name} {RMSE_static:.4f}")
     print (f"Static-Features MedAE: {model_name} {MedAE_static:.4f}")
 
-    #===================================
-    # MODELL MIT STATIC+PROCESS-FEATURES
-    #===================================
+    # Training auf dem Quellprojekt Jira und Evaluation auf dem Zielprojekt Spring (statische + prozessbezogene Merkmale)
     model.fit(x_static_process_jira, y_static_process_jira)
     y_pred_static_process = model.predict(x_static_process_spring)
     r2_static_process = r2_score(y_static_process_spring, y_pred_static_process)
