@@ -55,7 +55,7 @@ mariadb_changelog_flat <- mariadb_changelog_flat %>%
     change_created = as.POSIXct(change_created, format = "%Y-%m-%dT%H:%M:%OS", tz = "UTC")
   )
 
-# Optional: speichern, damit du später nicht neu ziehen musst
+# Speichern
 if (!dir.exists("data")) dir.create("data")
 saveRDS(mariadb_tickets, "data/mariadb_tickets.rds")
 saveRDS(mariadb_changelog_flat, "data/mariadb_changelog_flat.rds")
