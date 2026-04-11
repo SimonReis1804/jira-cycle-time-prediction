@@ -22,7 +22,11 @@ In den Projekten die für Experiment 3 genutzt wurden, wurde keine ausführliche
 - `05_changelog_aktivitätsanalyse.R`: Joins für die Feature-Tabelle  
 - `07_feature_table_hyperledger.R`: Erstellung der Feature Tabelle für ML-Modelle
 
-Die R-Skripte in `r/BA_Jira_Jiraecosystem/R`, `r/BA_Jira_Spring/R` und `r/BA_Jira_MariaDB/R` folgendem dem gleichen Ablauf.   
+Die R-Skripte in `r/BA_Jira_Jiraecosystem/R`, `r/BA_Jira_Spring/R` und `r/BA_Jira_MariaDB/R` folgendem dem gleichen Ablauf. 
+
+### Results/R
+
+Dieser Ordner enthält die verschiedenen Skripte um eine Master-Tabelle auszuwerten.
 
 ## Ablauf
 Die Skripte sind nummeriert und sollten auch in gegebener Reihenfolge ausgeführt werden:
