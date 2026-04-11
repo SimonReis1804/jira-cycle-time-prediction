@@ -7,11 +7,6 @@ Die Rohdaten liegen in MongoDB (lokal) und werden ohne CSV-Export direkt per PyM
 - `src/`: Python Code für Datenextraktion, Feature Encoding, ML-Modelle, Optimierung, Hilfsfunktionen
 - `r/`: R Code für Datenanalyse und Erstellung einer Feature-Tabelle
 
-## Quickstart (tägliches Arbeiten)
-1. VSCode: Ordner `jira-ml-cycle-time` öffnen
-2. Terminal öffnen und venv aktivieren:
-   - Windows: `.venv\Scripts\activate`
-
 ## Reproduzierbarkeit 
 
 ### Verwendete Technologien & Voraussetzungen
